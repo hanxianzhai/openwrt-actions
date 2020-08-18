@@ -10,8 +10,8 @@ on:
       - 'start'
 #  schedule:
 #    - cron: 0 20 * * *
-#  watch:
-#    types: [started]
+  watch:
+    types: [started]
 
 env:
   RUN_VALIDATION: true
