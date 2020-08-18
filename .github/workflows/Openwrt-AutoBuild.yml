@@ -1,17 +1,17 @@
 name: Openwrt-AutoBuild
 
 on:
-#  release:
-#    types: [published]
+  release:
+    types: [published]
   push:
     branches:
       - master
     paths:
       - 'start'
-  schedule:
-    - cron: 0 20 * * *
-  watch:
-    types: [started]
+#  schedule:
+#    - cron: 0 20 * * *
+#  watch:
+#    types: [started]
 
 env:
   RUN_VALIDATION: true
