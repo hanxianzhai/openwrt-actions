@@ -58,6 +58,7 @@ jobs:
         echo "::set-env name=UPLOAD_TO_REALEASE::${UPLOAD_TO_REALEASE}"
         echo "::set-env name=UPLOAD_TO_COWTRANSFER::${UPLOAD_TO_COWTRANSFER}"       
         echo "::set-env name=WECHAT_NOTIFICATION::${WECHAT_NOTIFICATION}"
+        echo "::set-env name=SSH_ACTIONS::${SSH_ACTIONS}"
         
 
         
@@ -113,7 +114,12 @@ jobs:
     - name: Download latest config
       run: |
         cd openwrt
-        curl -skL https://raw.githubusercontent.com/Lienol/openwrt-actions/master/user/${{matrix.target}}/config.diff -o .config
+        curl -skL https://raw.githubusercontent.com/hanxianzhai/openwrt-actions/master/user/${{matrix.target}}/config.diff -o .config
+
+    - name: SSH connection to Actions
+      uses: P3TERX/debugger-action@main
+      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+
         
     - name: Download package
       id: package
@@ -158,7 +164,7 @@ jobs:
       if: env.UPLOAD_PACKAGES_DIR == 'true' && env.UPLOAD_TO_REALEASE == 'true' && !cancelled() &&  steps.compile.outputs.status == 'success'
       uses: svenstaro/upload-release-action@v1-release
       with:
-        repo_token: ${{ secrets.SUPER_TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: openwrt/bin/${{matrix.target}}_packages.tar
         asset_name: ${{matrix.target}}_packages.tar
         tag: ${{ env.DATE }}
@@ -169,7 +175,7 @@ jobs:
       if: env.UPLOAD_TARGETS_DIR == 'true' && env.UPLOAD_TO_REALEASE == 'true' && !cancelled() &&  steps.compile.outputs.status == 'success'
       uses: svenstaro/upload-release-action@v1-release
       with:
-        repo_token: ${{ secrets.SUPER_TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: openwrt/bin/${{matrix.target}}_targets.tar
         asset_name: ${{matrix.target}}_targets.tar
         tag: ${{ env.DATE }}
@@ -213,4 +219,4 @@ jobs:
                
     - name: WeChat notification
       if: env.WECHAT_NOTIFICATION == 'true' && !cancelled() && steps.compile.outputs.status == 'success'
-      run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=${{matrix.target}}编译完成
+      run: curl https://sc.ftqq.com/${{ secrets.ServerJSCKEY }}.send?text=${{matrix.target}}编译完成
