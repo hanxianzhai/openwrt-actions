@@ -1,5 +1,8 @@
 name: AutoBuild
 
+env:
+  TZ: Asia/Shanghai
+
 on:
   repository_dispatch:
   release:
@@ -54,6 +57,7 @@ jobs:
         echo "::set-env name=SSH_ACTIONS::${SSH_ACTIONS}"
              
     - name: Clone source code and install
+      working-directory: /workdir
       run: |
         git clone ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} ${{matrix.target}}
         cd ${{matrix.target}}
@@ -61,6 +65,7 @@ jobs:
         ./scripts/feeds install -a
 
     - name: Download latest config and Load custom configuration
+      working-directory: /workdir
       run: |        
         cd ${{matrix.target}}
         curl -fsSL https://raw.githubusercontent.com/hanxianzhai/openwrt-actions/master/${{matrix.target}}/x86_64/.config >.config
@@ -72,6 +77,7 @@ jobs:
       if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
     - name: Use config
+      working-directory: /workdir
       run: |
         cd ${{matrix.target}}
         make defconfig
@@ -109,6 +115,7 @@ jobs:
       run: df -hT
 
     - name: Upload bin directory
+      working-directory: /workdir
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
@@ -116,6 +123,7 @@ jobs:
         path: openwrt/bin
 
     - name: Organize files
+      working-directory: /workdir
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
