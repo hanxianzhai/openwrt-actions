@@ -1,17 +1,18 @@
 name: Openwrt-AutoBuild
 
 on:
+  repository_dispatch:
   release:
-    types: [published]
+    types: published
   push:
     branches:
-      - master
+      - main
     paths:
       - 'start'
 #  schedule:
-#    - cron: 0 20 * * *
+#    - cron: 0 8 * * 5
   watch:
-    types: [started]
+    types: started
 
 env:
   RUN_VALIDATION: true
@@ -59,9 +60,7 @@ jobs:
         echo "::set-env name=UPLOAD_TO_COWTRANSFER::${UPLOAD_TO_COWTRANSFER}"       
         echo "::set-env name=WECHAT_NOTIFICATION::${WECHAT_NOTIFICATION}"
         echo "::set-env name=SSH_ACTIONS::${SSH_ACTIONS}"
-        
-
-        
+             
     - name: Clone source code
       run: |
         git clone ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
@@ -134,9 +133,12 @@ jobs:
       id: compile
       run: |
         cd openwrt
-        echo -e "3 thread compile"
-        make -j3 || make -j1 V=s
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
         echo "::set-output name=status::success"
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
+        echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
         
     - name:  Pack packages_dir
       if: steps.compile.outputs.status == 'success'
