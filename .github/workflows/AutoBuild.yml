@@ -1,8 +1,5 @@
 name: AutoBuild
 
-env:
-  TZ: Asia/Shanghai
-
 on:
   repository_dispatch:
   release:
@@ -19,6 +16,7 @@ on:
 
 env:
   RUN_VALIDATION: true
+  TZ: Asia/Shanghai
 
 jobs:
   build:
