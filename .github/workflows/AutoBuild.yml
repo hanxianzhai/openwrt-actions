@@ -44,8 +44,7 @@ jobs:
         source "${GITHUB_WORKSPACE}/${{matrix.target}}/settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
-        echo "::set-env name=UPLOAD_PACKAGES_DIR::${UPLOAD_PACKAGES_DIR}"
-        echo "::set-env name=UPLOAD_TARGETS_DIR::${UPLOAD_TARGETS_DIR}"        
+        echo "::set-env name=UPLOAD_BIN_DIR::${UPLOAD_BIN_DIR}"        
         echo "::set-env name=UPLOAD_FIRMWARE::${UPLOAD_FIRMWARE}"        
         echo "::set-env name=UPLOAD_TO_ARTIFACTS::${UPLOAD_TO_ARTIFACTS}"
         echo "::set-env name=UPLOAD_TO_REALEASE::${UPLOAD_TO_REALEASE}"
@@ -74,29 +73,21 @@ jobs:
       uses: P3TERX/debugger-action@main
       if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
-    - name: Use config
+    - name: Use config and Download package
       working-directory: /workdir
-      run: |
-        cd ${{matrix.target}}
-        make defconfig
-        
-    - name: Failure WeChat notification
-      if: failure()
-      run: curl https://sc.ftqq.com/${{ secrets.ServerJSCKEY }}.send?text=${{matrix.target}}编译失败
-        
-    - name: Download package
       id: package
       run: |
-        cd openwrt
+        cd ${{matrix.target}}
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile the firmware
+      working-directory: /workdir
       id: compile
       run: |
-        cd openwrt
+        cd ${{matrix.target}}
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "::set-output name=status::success"
@@ -105,7 +96,7 @@ jobs:
         echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
 
     - name: Check compile usage
-      if: failure()
+      if: env.WECHAT_NOTIFICATION == 'true' && failure()  
       run: curl https://sc.ftqq.com/${{ secrets.ServerJSCKEY }}.send?text=${{matrix.target}}编译失败
         
     - name: Check space usage
@@ -116,7 +107,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: ${{matrix.target}}_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: workdir/openwrt/bin
 
     - name: Organize files
@@ -124,9 +115,9 @@ jobs:
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "::set-env name=FIRMWARE::$PWD"
+        cd ${{matrix.target}}/bin/
+        tar -cvf ${{matrix.target}}_bin.tar ./
+        echo "::set-env name=FIRMWARE::$(readlink -f *.tar)"
         echo "::set-output name=status::success"
 
     - name: Upload firmware directory
