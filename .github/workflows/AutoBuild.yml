@@ -108,7 +108,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: ${{matrix.target}}_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: workdir/openwrt/bin
+        path: workdir/${{matrix.target}}/bin
 
     - name: Organize files
       working-directory: /workdir
