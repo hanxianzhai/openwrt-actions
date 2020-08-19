@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [lede,openwrt]
+        target: [openwrt]
     
     steps:
     - name: Checkout
