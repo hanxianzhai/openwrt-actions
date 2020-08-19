@@ -99,6 +99,11 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
         echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
+
+    - name: Failure WeChat notification
+      if: failure()
+      run: curl https://sc.ftqq.com/${{ secrets.ServerJSCKEY }}.send?text=${{matrix.target}}编译失败
+        
         
     - name:  Pack packages_dir
       if: steps.compile.outputs.status == 'success'
