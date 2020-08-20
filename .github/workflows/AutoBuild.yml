@@ -42,7 +42,8 @@ jobs:
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"      
         echo "::set-env name=UPLOAD_FIRMWARE::${UPLOAD_FIRMWARE}"        
         echo "::set-env name=UPLOAD_TO_WENSHUSHU::${UPLOAD_TO_WENSHUSHU}"
-        echo "::set-env name=UPLOAD_TO_WETRANSFER::${UPLOAD_TO_WETRANSFER}"       
+        echo "::set-env name=UPLOAD_TO_WETRANSFER::${UPLOAD_TO_WETRANSFER}"
+        echo "::set-env name=UPLOAD_TO_LANZOUS::${UPLOAD_TO_LANZOUS}"  
         echo "::set-env name=WECHAT_NOTIFICATION::${WECHAT_NOTIFICATION}"
         echo "::set-env name=SSH_ACTIONS::${SSH_ACTIONS}"
              
