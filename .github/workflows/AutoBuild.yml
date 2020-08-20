@@ -133,6 +133,13 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 64 --no-progress ${FIRMWARE} 2>&1 | wenshushu.log
         echo "::warning file=wenshushu.cn::$(cat wenshushu.log | grep https)"
+
+    - name: Upload firmware to lanzous
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_${{matrix.target}} }};' -s -p 16 --no-progress ${FIRMWARE} 2>&1 | lanzous.log
+        echo "::warning file=lanzous.com::$(cat lanzous.log | grep https)"
    
     - name: Upload firmware to WeTransfer
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_WETRANSFER == 'true' && !cancelled()
