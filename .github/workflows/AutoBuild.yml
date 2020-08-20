@@ -43,11 +43,8 @@ jobs:
       run: |    
         source "${GITHUB_WORKSPACE}/${{matrix.target}}/settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
-        echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
-#        echo "::set-env name=UPLOAD_BIN_DIR::${UPLOAD_BIN_DIR}"        
+        echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"      
         echo "::set-env name=UPLOAD_FIRMWARE::${UPLOAD_FIRMWARE}"        
-#        echo "::set-env name=UPLOAD_TO_ARTIFACTS::${UPLOAD_TO_ARTIFACTS}"
-#        echo "::set-env name=UPLOAD_TO_REALEASE::${UPLOAD_TO_REALEASE}"
         echo "::set-env name=UPLOAD_TO_WENSHUSHU::${UPLOAD_TO_WENSHUSHU}"
         echo "::set-env name=UPLOAD_TO_WETRANSFER::${UPLOAD_TO_WETRANSFER}"       
         echo "::set-env name=WECHAT_NOTIFICATION::${WECHAT_NOTIFICATION}"
