@@ -136,10 +136,17 @@ jobs:
         echo "::warning file=wenshushu.cn::$(cat wenshushu.log | grep https)"
 
     - name: Upload firmware to lanzous
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled() && ${{matrix.target}} == 'lede'
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_${{matrix.target}} }};' -s -p 16 --no-progress ${FIRMWARE} 2>&1 | lanzous.log
+        ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_LEDE }};' -s -p 16 --no-progress ${FIRMWARE} 2>&1 | lanzous.log
+        echo "::warning file=lanzous.com::$(cat lanzous.log | grep https)"
+
+    - name: Upload firmware to lanzous
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled() && ${{matrix.target}} == 'openwrt'
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_OPENWRT }};' -s -p 16 --no-progress ${FIRMWARE} 2>&1 | lanzous.log
         echo "::warning file=lanzous.com::$(cat lanzous.log | grep https)"
    
     - name: Upload firmware to WeTransfer
