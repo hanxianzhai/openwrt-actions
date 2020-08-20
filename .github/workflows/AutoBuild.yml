@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [openwrt]
+        target: [openwrt,lede]
     
     steps:
     - name: Checkout
@@ -44,12 +44,12 @@ jobs:
         source "${GITHUB_WORKSPACE}/${{matrix.target}}/settings.ini"
         echo "::set-env name=REPO_URL::${REPO_URL}"
         echo "::set-env name=REPO_BRANCH::${REPO_BRANCH}"
-        echo "::set-env name=UPLOAD_BIN_DIR::${UPLOAD_BIN_DIR}"        
+#        echo "::set-env name=UPLOAD_BIN_DIR::${UPLOAD_BIN_DIR}"        
         echo "::set-env name=UPLOAD_FIRMWARE::${UPLOAD_FIRMWARE}"        
-        echo "::set-env name=UPLOAD_TO_ARTIFACTS::${UPLOAD_TO_ARTIFACTS}"
-        echo "::set-env name=UPLOAD_TO_REALEASE::${UPLOAD_TO_REALEASE}"
-        echo "::set-env name=UPLOAD_TO_WETRANSFER::${UPLOAD_TO_WETRANSFER}"
-        echo "::set-env name=UPLOAD_TO_COWTRANSFER::${UPLOAD_TO_COWTRANSFER}"       
+#        echo "::set-env name=UPLOAD_TO_ARTIFACTS::${UPLOAD_TO_ARTIFACTS}"
+#        echo "::set-env name=UPLOAD_TO_REALEASE::${UPLOAD_TO_REALEASE}"
+        echo "::set-env name=UPLOAD_TO_WENSHUSHU::${UPLOAD_TO_WENSHUSHU}"
+        echo "::set-env name=UPLOAD_TO_WETRANSFER::${UPLOAD_TO_WETRANSFER}"       
         echo "::set-env name=WECHAT_NOTIFICATION::${WECHAT_NOTIFICATION}"
         echo "::set-env name=SSH_ACTIONS::${SSH_ACTIONS}"
              
@@ -127,12 +127,19 @@ jobs:
         name: ${{matrix.target}}_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
-    - name: Upload firmware to cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_COWTRANSFER == 'true' && !cancelled()
+    # - name: Upload firmware to cowtransfer
+    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_COWTRANSFER == 'true' && !cancelled()
+    #   run: |
+    #     curl -fsSL git.io/file-transfer | sh
+    #     ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+    #     echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+
+    - name: Upload firmware to wenshushu
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_WENSHUSHU == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        ./transfer wss -s -p 64 --no-progress ${FIRMWARE} 2>&1 | wenshushu.log
+        echo "::warning file=wenshushu.cn::$(cat wenshushu.log | grep https)"
    
     - name: Upload firmware to WeTransfer
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_WETRANSFER == 'true' && !cancelled()
