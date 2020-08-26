@@ -136,11 +136,11 @@ jobs:
         echo "::warning file=catbox.cn::$(cat catbox.log | grep https)"
 
     - name: Upload to release
-        uses: JasonEtco/upload-to-release@master
-        with:
-          args: ${FIRMWARE} application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: JasonEtco/upload-to-release@master
+      with:
+        args: ${FIRMWARE} application/octet-stream
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
    
     - name: Upload firmware to lanzous
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
