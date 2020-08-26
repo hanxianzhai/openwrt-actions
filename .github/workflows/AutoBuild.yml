@@ -135,12 +135,12 @@ jobs:
         ./transfer cat --no-progress ${FIRMWARE} 2>&1 | tee catbox.log
         echo "::warning file=catbox.cn::$(cat catbox.log | grep https)"
 
-    # - name: Upload firmware to lanzous
-    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
-    #   run: |
-    #     curl -fsSL git.io/file-transfer | sh
-    #     [ ${{matrix.target}} == lede ] && ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_LEDE }};' --no-progress ${FIRMWARE} 2>&1 | tee lanzous.log || ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}; folder_id_c=${{ secrets.LANZOUS_FOLDER_ID_C_OPENWRT }};' --no-progress ${FIRMWARE} 2>&1 | tee lanzous.log
-    #     echo "::warning file=lanzous.com::$(cat lanzous.log | grep https)"
+    - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: ${FIRMWARE} application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
    
     - name: Upload firmware to lanzous
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
