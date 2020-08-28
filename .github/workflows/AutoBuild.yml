@@ -121,33 +121,40 @@ jobs:
         name: ${{matrix.target}}_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
-    # - name: Upload firmware to cowtransfer
-    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_COWTRANSFER == 'true' && !cancelled()
-    #   run: |
-    #     curl -fsSL git.io/file-transfer | sh
-    #     ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-    #     echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-
-    - name: Upload firmware to catbox 
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_CATBOX == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cat --no-progress ${FIRMWARE} 2>&1 | tee catbox.log
-        echo "::warning file=catbox.cn::$(cat catbox.log | grep https)"
-
-    - name: Upload to release
-      uses: JasonEtco/upload-to-release@master
-      with:
-        args: ${FIRMWARE} application/octet-stream
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Create Release
+    #     id: create_release
+    #     uses: actions/create-release@v1
+    #     env:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    #     with:
+    #       tag_name: ${{matrix.target}}
+    #       release_name: Release ${{matrix.target}}
+    #       body: |
+    #         Changes in this Release
+    #         - First Change
+    #         - Second Change
+    #       draft: false
+    #       prerelease: false
    
-    - name: Upload firmware to lanzous
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_LANZOUS == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer lzs --cookie='phpdisk_info=${{ secrets.LANZOUS_PHPDISK_INFO }}' --no-progress ${FIRMWARE} 2>&1 | tee lanzous.log
-        echo "::warning file=lanzous.com::$(cat lanzous.log | grep https)"
+    - name: Copy single file to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ${FIRMWARE}
+          remote: scp/single/${{matrix.target}}_bin.tar
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+    
+    - name: remove the specified number of leading path elements
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: 22
+          source: "${FIRMWARE},${FIRMWARE}"
+          target: "foobar"
+          strip_components: 1
 
     - name: Upload firmware to WeTransfer
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_TO_WETRANSFER == 'true' && !cancelled()
