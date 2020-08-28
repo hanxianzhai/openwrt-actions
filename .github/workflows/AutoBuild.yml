@@ -138,8 +138,8 @@ jobs:
 
     
     - name: remove the specified number of leading path elements
-        uses: appleboy/scp-action@main
-        with:
+      uses: appleboy/scp-action@master
+      with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
